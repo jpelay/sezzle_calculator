@@ -24,7 +24,7 @@ The applications run in the following addresses:
 
 #### Production
 
-To deploy the application as a single container run:
+To deploy both the frontend and backend containers at the same time do:
 
 ```sh
 make prod-up
@@ -54,12 +54,14 @@ npm run dev
 To run the backend using the hotreloader, make sure you have air installed and run:
 
 ```
+cd backend
 air -c .air.toml
 ```
 
 Otherwise you can run it using:
 
 ```
+cd backend
 go run main.go
 ```
 
@@ -146,5 +148,7 @@ You can also run the commands directly:
 cd backend && mkdir -p coverage && go test ./... -covermode=atomic -coverprofile=coverage/coverage.out && go tool cover -func=coverage/coverage.out && go tool cover -html=coverage/coverage.out -o coverage/index.html
 cd frontend/calculator && npm run test:coverage
 ```
+
+In a production application, these shouldn't be added to the git tree, but I'm adding them here for ilustrative purposes.s
 
 Jesus Pelay

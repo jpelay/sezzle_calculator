@@ -266,4 +266,53 @@ describe('App', () => {
 
     expect(await screen.findByText('Division by zero')).toBeInTheDocument();
   });
+
+  it('supports keyboard input for binary operations', async () => {
+    mockResponseOnce({ result: '19' });
+
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+
+    await user.keyboard('1');
+    await user.keyboard('2');
+    await user.keyboard('+');
+    expect(pendingText(container)).toBe('12 +');
+    expect(getDisplay(container)).toHaveTextContent('0');
+
+    await user.keyboard('7');
+    await user.keyboard('{Enter}');
+
+    await waitFor(() => expect(getDisplay(container)).toHaveTextContent('19'));
+    expect(fetchMock).toHaveBeenCalledWith('/calculate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        operand1: '12',
+        operator: '+',
+        operand2: '7',
+      }),
+    });
+    expect(pendingText(container)).toBe('');
+  });
+
+  it('supports keyboard Backspace and Escape controls', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+
+    await user.keyboard('123');
+    expect(getDisplay(container)).toHaveTextContent('123');
+
+    await user.keyboard('{Backspace}');
+    expect(getDisplay(container)).toHaveTextContent('12');
+
+    await user.keyboard('*');
+    expect(pendingText(container)).toBe('12 *');
+    expect(getDisplay(container)).toHaveTextContent('0');
+
+    await user.keyboard('{Escape}');
+    expect(getDisplay(container)).toHaveTextContent('0');
+    expect(pendingText(container)).toBe('');
+  });
 });
