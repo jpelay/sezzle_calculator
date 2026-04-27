@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>calculatorservice: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">sezzle/calculatorservice/main.go (63.3%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "encoding/json"
+        "errors"
+        "math"
+        "net/http"
+        "os"
+        "strconv"
+        "strings"
+
+        "github.com/gin-contrib/cors"
+        "github.com/gin-gonic/gin"
+)
+
+// OperationRequest represents the expected JSON structure for calculation requests.
+type OperationRequest struct {
+        Operator string          `json:"operator"`
+        Operand1 json.RawMessage `json:"operand1"`
+        Operand2 json.RawMessage `json:"operand2"`
+}
+
+// OperationResponse represents the JSON structure for calculation responses.
+type OperationResponse struct {
+        Result string `json:"result,omitempty"`
+        Error  string `json:"error,omitempty"`
+}
+
+func main() <span class="cov0" title="0">{
+        router := newRouter()
+        host := getEnv("HOST", "0.0.0.0")
+        port := getEnv("PORT", "8080")
+
+        if err := router.Run(host + ":" + port); err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+}
+
+// Since the operations are so simple and atomic, we can just expose them as a single endpoint
+func newRouter() *gin.Engine <span class="cov0" title="0">{
+        router := gin.Default()
+        router.Use(cors.Default())
+        router.POST("/calculate", calculate)
+
+        return router
+}</span>
+
+func getEnv(name string, fallback string) string <span class="cov0" title="0">{
+        value := strings.TrimSpace(os.Getenv(name))
+        if value == "" </span><span class="cov0" title="0">{
+                return fallback
+        }</span>
+
+        <span class="cov0" title="0">return value</span>
+}
+
+// calculate responds with the result of the calculation as JSON.
+func calculate(c *gin.Context) <span class="cov8" title="12">{
+        var req OperationRequest
+        if err := c.BindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+                c.JSON(http.StatusBadRequest, OperationResponse{Error: "Invalid request"})
+                return
+        }</span>
+
+        <span class="cov8" title="12">op1, err := parseOperand(req.Operand1, "operand1")
+        if err != nil </span><span class="cov3" title="2">{
+                c.JSON(http.StatusBadRequest, OperationResponse{Error: err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="10">var result float64
+        switch req.Operator </span>{
+        case "+":<span class="cov1" title="1">
+                op2, err := parseOperand(req.Operand2, "operand2")
+                if err != nil </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, OperationResponse{Error: err.Error()})
+                        return
+                }</span>
+                <span class="cov1" title="1">result = op1 + op2</span>
+        case "-":<span class="cov0" title="0">
+                op2, err := parseOperand(req.Operand2, "operand2")
+                if err != nil </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, OperationResponse{Error: err.Error()})
+                        return
+                }</span>
+                <span class="cov0" title="0">result = op1 - op2</span>
+        case "*":<span class="cov1" title="1">
+                op2, err := parseOperand(req.Operand2, "operand2")
+                if err != nil </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, OperationResponse{Error: err.Error()})
+                        return
+                }</span>
+                <span class="cov1" title="1">result = op1 * op2</span>
+        case "/":<span class="cov3" title="2">
+                op2, err := parseOperand(req.Operand2, "operand2")
+                if err != nil </span><span class="cov1" title="1">{
+                        c.JSON(http.StatusBadRequest, OperationResponse{Error: err.Error()})
+                        return
+                }</span>
+                <span class="cov1" title="1">if op2 == 0 </span><span class="cov1" title="1">{
+                        c.JSON(http.StatusBadRequest, OperationResponse{Error: "Division by zero"})
+                        return
+                }</span>
+                <span class="cov0" title="0">result = op1 / op2</span>
+        case "^":<span class="cov3" title="2">
+                op2, err := parseOperand(req.Operand2, "operand2")
+                if err != nil </span><span class="cov0" title="0">{
+                        c.JSON(http.StatusBadRequest, OperationResponse{Error: err.Error()})
+                        return
+                }</span>
+                <span class="cov3" title="2">result = math.Pow(op1, op2)</span>
+        case "sqrt":<span class="cov3" title="2">
+                if op1 &lt; 0 </span><span class="cov1" title="1">{
+                        c.JSON(http.StatusBadRequest, OperationResponse{Error: "Square root requires a non-negative operand"})
+                        return
+                }</span>
+                <span class="cov1" title="1">result = math.Sqrt(op1)</span>
+        case "%":<span class="cov1" title="1">
+                result = op1 / 100</span>
+        default:<span class="cov1" title="1">
+                c.JSON(http.StatusBadRequest, OperationResponse{Error: "Unsupported operator"})
+                return</span>
+        }
+
+        <span class="cov6" title="6">if math.IsInf(result, 0) || math.IsNaN(result) </span><span class="cov1" title="1">{
+                c.JSON(http.StatusBadRequest, OperationResponse{Error: "Result is out of supported numeric range"})
+                return
+        }</span>
+
+        <span class="cov6" title="5">c.JSON(http.StatusOK, OperationResponse{Result: formatResult(result)})</span>
+}
+
+// The operands come as strings, possibly as numbers formmatted in scientific notation
+// We need to parse them into float64 for the calculations, but also handle various edge cases and provide clear error messages
+func parseOperand(raw json.RawMessage, field string) (float64, error) <span class="cov10" title="18">{
+        if len(raw) == 0 </span><span class="cov0" title="0">{
+                return 0, &amp;operandError{field: field, message: "is required"}
+        }</span>
+
+        <span class="cov10" title="18">var valueStr string
+        if string(raw) == "null" </span><span class="cov1" title="1">{
+                return 0, &amp;operandError{field: field, message: "is required"}
+        }</span>
+
+        <span class="cov9" title="17">if raw[0] == '"' </span><span class="cov9" title="17">{
+                if err := json.Unmarshal(raw, &amp;valueStr); err != nil </span><span class="cov0" title="0">{
+                        return 0, &amp;operandError{field: field, message: "must be a valid number"}
+                }</span>
+        } else<span class="cov0" title="0"> {
+                valueStr = string(raw)
+        }</span>
+
+        <span class="cov9" title="17">valueStr = strings.TrimSpace(valueStr)
+        if valueStr == "" </span><span class="cov0" title="0">{
+                return 0, &amp;operandError{field: field, message: "must not be empty"}
+        }</span>
+
+        <span class="cov9" title="17">value, err := strconv.ParseFloat(valueStr, 64)
+        if err != nil </span><span class="cov3" title="2">{
+                var numErr *strconv.NumError
+                if errors.As(err, &amp;numErr) &amp;&amp; numErr.Err == strconv.ErrRange </span><span class="cov1" title="1">{
+                        return 0, &amp;operandError{field: field, message: "is too large"}
+                }</span>
+                <span class="cov1" title="1">return 0, &amp;operandError{field: field, message: "must be a valid number"}</span>
+        }
+
+        <span class="cov9" title="15">if math.IsInf(value, 0) || math.IsNaN(value) </span><span class="cov0" title="0">{
+                return 0, &amp;operandError{field: field, message: "is out of supported numeric range"}
+        }</span>
+
+        <span class="cov9" title="15">return value, nil</span>
+}
+
+type operandError struct {
+        field   string
+        message string
+}
+
+func (e *operandError) Error() string <span class="cov4" title="3">{
+        return e.field + " " + e.message
+}</span>
+
+func formatResult(value float64) string <span class="cov6" title="5">{
+        if value == 0 </span><span class="cov0" title="0">{
+                return "0"
+        }</span>
+
+        <span class="cov6" title="5">abs := math.Abs(value)
+        if abs &gt;= 1e12 || abs &lt; 1e-9 </span><span class="cov3" title="2">{
+                return strconv.FormatFloat(value, 'e', 10, 64)
+        }</span>
+
+        <span class="cov4" title="3">return strconv.FormatFloat(value, 'f', -1, 64)</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
