@@ -151,4 +151,15 @@ cd frontend/calculator && npm run test:coverage
 
 In a production application, these shouldn't be added to the git tree, but I'm adding them here for ilustrative purposes.s
 
+
+## Prompts used
+
+I use AI as a helper rather than just letting it run on its own. So my prompts to it are of the form:
+
+> Do this boring task for me
+
+Or
+
+> How can I do X on React/Go
+
 Jesus Pelay
