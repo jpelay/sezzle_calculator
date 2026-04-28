@@ -106,7 +106,9 @@ The frontend consumes from the backend trhough API calles, making it stateless a
 
 The backend exposes a single endpoint called `/calculate`. This endpoint is very simple as it only perform one operation per call. This choice was done due to the restrictions in time for the development of this project. If wanted, the backend could be expanded to handle abritrary strings, and thus parsing the input and then performing calculations on it.
 
-It also formats the numbers in case they are too large using scientific notation. If the number is outside of range, it will return an error.
+It also formats the numbers in case they are too large using scientific notation. If the number is outside of range, it will return an error. 
+
+For building the webserver I decided to use Gin, a popular Go web framework that simplyfies the process of developing backend applications, and is very fast.
 
 ### Frontend
 
